@@ -1,4 +1,4 @@
-from serialization import *
+from serialization import deserialize_object, serialize_object
 
 
 class Serializer:

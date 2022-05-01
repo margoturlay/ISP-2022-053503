@@ -482,11 +482,9 @@ class JsonSerializer:
         keys = list(obj)
         for i in keys[:-1]:
             res += step + '"' + str(i) + '"' + ": " + JsonSerializer._dumps(obj[i], step,
-                                                                            new_step.replace('\n', '')
-                                                                                        + step) + "," + new_step
-        res += step + '"' + str(keys[-1]) + '"' + ": " + JsonSerializer._dumps(obj[keys[-1]], step,
-                                                                               new_step.replace('\n', '')
-                                                                                        + step) + new_step + "}"
+                                                                    new_step.replace('\n', '') + step) + "," + new_step
+            res += step + '"' + str(keys[-1]) + '"' + ": " + JsonSerializer._dumps(obj[keys[-1]], step,
+                                                                    new_step.replace('\n', '') + step) + new_step + "}"
         return res
 
     @staticmethod

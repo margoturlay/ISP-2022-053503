@@ -1,4 +1,3 @@
-from serialization import serialize_object, deserialize_object
 from serializers.parser_sk import Parser
 from yaml import dump as dumps, full_load as loads
 
@@ -19,5 +18,5 @@ class YamlSerializer(Parser):
 
     @staticmethod
     def load(file="testyaml.yaml"):
-        with open(file, 'r+') as fr:
+        with open(file, 'r+'):
             return loads(file)
