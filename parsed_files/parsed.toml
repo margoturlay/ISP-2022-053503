@@ -1,0 +1,51 @@
+[[tuple]]
+str = "test_tuple"
+
+[[tuple]]
+bool = true
+
+[[tuple]]
+
+[tuple.dict.item0.key]
+str = "status"
+[tuple.dict.item0.value]
+str = "ok"
+[[tuple]]
+
+[[tuple.tuple]]
+str = "nested_tuple"
+
+[[tuple.tuple]]
+str = "one_more"
+
+[[tuple]]
+
+[[tuple.list]]
+str = "first"
+
+[[tuple.list]]
+str = "second"
+
+[[tuple.list]]
+int = 3
+
+[[tuple.list]]
+
+[tuple.list.dict.item0.key]
+str = "number"
+[tuple.list.dict.item0.value]
+int = 4
+[[tuple.list]]
+
+[tuple.list.dict.item0.key]
+str = "fa"
+[tuple.list.dict.item0.value]
+int = 3
+[tuple.list.dict.item1.key]
+str = "a"
+[tuple.list.dict.item1.value]
+str = "4"
+[tuple.list.dict.item2.key]
+int = 5
+[tuple.list.dict.item2.value]
+float = 6.923

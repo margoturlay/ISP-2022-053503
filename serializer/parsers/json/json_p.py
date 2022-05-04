@@ -1,4 +1,4 @@
-class JsonSerializer:
+class JsonParser:
     inspect = __import__('inspect')
     types = __import__('types')
     deque = getattr(__import__('collections'), 'deque')
@@ -7,20 +7,20 @@ class JsonSerializer:
 
     @staticmethod
     def dict_to_code(obj):
-        return JsonSerializer.types.CodeType(obj["co_argcount"],
+        return JsonParser.types.CodeType(obj["co_argcount"],
                                              obj["co_posonlyargcount"],
                                              obj["co_kwonlyargcount"],
                                              obj["co_nlocals"],
                                              obj["co_stacksize"],
                                              obj["co_flags"],
-                                             bytes(bytearray(JsonSerializer.parse_array(obj["co_code"], 1)[0])),
+                                             bytes(bytearray(JsonParser.parse_array(obj["co_code"], 1)[0])),
                                              tuple(obj["co_consts"]),
                                              tuple(obj["co_names"]),
                                              tuple(obj["co_varnames"]),
                                              obj["co_filename"],
                                              obj["co_name"],
                                              obj["co_firstlineno"],
-                                             bytes(bytearray(JsonSerializer.parse_array(obj["co_lnotab"], 1)[0])),
+                                             bytes(bytearray(JsonParser.parse_array(obj["co_lnotab"], 1)[0])),
                                              tuple(obj["co_freevars"]),
                                              tuple(obj["co_cellvars"]))
 
@@ -28,18 +28,18 @@ class JsonSerializer:
     def collect_funcs(obj, is_visited):
         for i in obj.__globals__:
             attr = obj.__globals__[i]
-            if JsonSerializer.inspect.isfunction(attr) and attr.__name__ not in is_visited:
+            if JsonParser.inspect.isfunction(attr) and attr.__name__ not in is_visited:
                 is_visited[attr.__name__] = attr
-                is_visited = JsonSerializer.collect_funcs(attr, is_visited)
+                is_visited = JsonParser.collect_funcs(attr, is_visited)
         return is_visited
 
     @staticmethod
     def is_instance(obj):
         if not hasattr(obj, '__dict__'):
             return False
-        if JsonSerializer.inspect.isroutine(obj):
+        if JsonParser.inspect.isroutine(obj):
             return False
-        if JsonSerializer.inspect.isclass(obj):
+        if JsonParser.inspect.isclass(obj):
             return False
         else:
             return True
@@ -82,7 +82,7 @@ class JsonSerializer:
                 colon = False
             elif not comma and not phase:
                 if next_char == '"':
-                    obj, idx = JsonSerializer.parse_string(string, idx + 1)
+                    obj, idx = JsonParser.parse_string(string, idx + 1)
                     if obj in args:
                         raise StopIteration(idx)
                     temp = obj
@@ -92,16 +92,16 @@ class JsonSerializer:
                     raise StopIteration(idx)
             elif not colon and phase:
                 if next_char == '"':
-                    obj, idx = JsonSerializer.parse_string(string, idx + 1)
+                    obj, idx = JsonParser.parse_string(string, idx + 1)
                     args[temp] = obj
                 elif next_char.isdigit() or (next_char == '-' and string[idx + 1].isdigit()):
-                    obj, idx = JsonSerializer.parse_digit(string, idx)
+                    obj, idx = JsonParser.parse_digit(string, idx)
                     args[temp] = obj
                 elif next_char == '{':
-                    obj, idx = JsonSerializer.parse_dict(string, idx + 1)
+                    obj, idx = JsonParser.parse_dict(string, idx + 1)
                     args[temp] = obj
                 elif next_char == '[':
-                    obj, idx = JsonSerializer.parse_array(string, idx + 1)
+                    obj, idx = JsonParser.parse_array(string, idx + 1)
                     args[temp] = obj
                 elif next_char == 'n' and string[idx:idx + 4] == 'null':
                     args[temp] = None
@@ -135,22 +135,22 @@ class JsonSerializer:
 
         if not comma and not colon and len(args) != 0:
             raise StopIteration(idx)
-        if "##function_type##" in args and len(args.keys()) == 1:
-            return JsonSerializer.dict_to_func(args["##function_type##"]), idx + 1
-        if "##static_method_type##" in args and len(args.keys()) == 1:
-            return staticmethod(args["##static_method_type##"]), idx + 1
-        if "##class_method_type##" in args and len(args.keys()) == 1:
-            return classmethod(args["##static_method_type##"]), idx + 1
-        if "##class_type##" in args and len(args.keys()) == 1:
-            return JsonSerializer.dict_to_class(args["##class_type##"]), idx + 1
-        if "##instance_type##" in args and len(args.keys()) == 1:
-            return JsonSerializer.dict_to_obj(args["##instance_type##"]), idx + 1
-        if "##module_type##" in args and len(args.keys()) == 1:
-            return JsonSerializer.dict_to_module(args["##module_type##"]), idx + 1
-        if "##code_type##" in args and len(args.keys()) == 1:
-            return JsonSerializer.dict_to_code(args["##code_type##"]), idx + 1
+        if "function_type" in args and len(args.keys()) == 1:
+            return JsonParser.dict_to_func(args["function_type"]), idx + 1
+        if "static_method_type" in args and len(args.keys()) == 1:
+            return staticmethod(args["static_method_type"]), idx + 1
+        if "class_method_type" in args and len(args.keys()) == 1:
+            return classmethod(args["static_method_type"]), idx + 1
+        if "class_type" in args and len(args.keys()) == 1:
+            return JsonParser.dict_to_class(args["class_type"]), idx + 1
+        if "instance_type" in args and len(args.keys()) == 1:
+            return JsonParser.dict_to_obj(args["instance_type"]), idx + 1
+        if "module_type" in args and len(args.keys()) == 1:
+            return JsonParser.dict_to_module(args["module_type"]), idx + 1
+        if "code_type" in args and len(args.keys()) == 1:
+            return JsonParser.dict_to_code(args["code_type"]), idx + 1
         else:
-            if JsonSerializer.sort:
+            if JsonParser.sort:
                 return dict(sorted(args.items())), idx + 1
             else:
                 return args, idx + 1
@@ -165,7 +165,7 @@ class JsonSerializer:
     @staticmethod
     def dict_to_obj(obj):
         try:
-            def __init__():
+            def __init__(self):
                 pass
 
             cls = obj["class"]
@@ -183,20 +183,20 @@ class JsonSerializer:
     def set_funcs(obj, is_visited, gls):
         for i in obj.__globals__:
             attr = obj.__globals__[i]
-            if JsonSerializer.inspect.isfunction(attr) and attr.__name__ not in is_visited:
+            if JsonParser.inspect.isfunction(attr) and attr.__name__ not in is_visited:
                 is_visited[attr.__name__] = True
                 attr.__globals__.update(gls)
-                is_visited = JsonSerializer.set_funcs(attr, is_visited, gls)
+                is_visited = JsonParser.set_funcs(attr, is_visited, gls)
         return is_visited
 
     @staticmethod
     def dict_to_func(obj):
-        res = JsonSerializer.types.FunctionType(globals=obj["__globals__"],
+        res = JsonParser.types.FunctionType(globals=obj["__globals__"],
                                                 code=obj["__code__"],
                                                 name=obj['__name__'])
-        funcs = JsonSerializer.collect_funcs(res, {})
+        funcs = JsonParser.collect_funcs(res, {})
         funcs.update({res.__name__: res})
-        JsonSerializer.set_funcs(res, {res.__name__: True}, funcs)
+        JsonParser.set_funcs(res, {res.__name__: True}, funcs)
         res.__globals__.update(funcs)
         res.__globals__['__builtins__'] = __import__('builtins')
         return res
@@ -237,7 +237,7 @@ class JsonSerializer:
 
     @staticmethod
     def parse_array(string, idx):
-        args = JsonSerializer.deque()
+        args = JsonParser.deque()
         comma = False
 
         try:
@@ -257,16 +257,16 @@ class JsonSerializer:
                 comma = False
             elif not comma:
                 if next_char == '"':
-                    obj, idx = JsonSerializer.parse_string(string, idx + 1)
+                    obj, idx = JsonParser.parse_string(string, idx + 1)
                     args.append(obj)
                 elif next_char.isdigit() or (next_char == '-' and string[idx + 1].isdigit()):
-                    obj, idx = JsonSerializer.parse_digit(string, idx)
+                    obj, idx = JsonParser.parse_digit(string, idx)
                     args.append(obj)
                 elif next_char == '{':
-                    obj, idx = JsonSerializer.parse_dict(string, idx + 1)
+                    obj, idx = JsonParser.parse_dict(string, idx + 1)
                     args.append(obj)
                 elif next_char == '[':
-                    obj, idx = JsonSerializer.parse_array(string, idx + 1)
+                    obj, idx = JsonParser.parse_array(string, idx + 1)
                     args.append(obj)
                 elif next_char == 'n' and string[idx:idx + 4] == 'null':
                     args.append(None)
@@ -305,7 +305,7 @@ class JsonSerializer:
 
     @staticmethod
     def code_to_dict(obj):
-        return {"##code_type##": {"co_argcount": obj.co_argcount,
+        return {"code_type": {"co_argcount": obj.co_argcount,
                                   "co_posonlyargcount": obj.co_posonlyargcount,
                                   "co_kwonlyargcount": obj.co_kwonlyargcount,
                                   "co_nlocals": obj.co_nlocals,
@@ -330,85 +330,85 @@ class JsonSerializer:
         if len(cls.__bases__) != 0:
             for i in cls.__bases__:
                 if i.__name__ != "object":
-                    bases += (JsonSerializer.class_to_dict(i),)
+                    bases += (JsonParser.class_to_dict(i),)
         args = {}
         st_args = dict(cls.__dict__)
         if len(st_args) != 0:
             for i in st_args:
-                if JsonSerializer.inspect.isclass(st_args[i]):
-                    args[i] = JsonSerializer.class_to_dict(st_args[i])
-                elif JsonSerializer.inspect.isfunction(st_args[i]):
-                    if st_args[i].__name__ not in JsonSerializer.func_found:
-                        args[i] = JsonSerializer.function_to_dict(st_args[i])
+                if JsonParser.inspect.isclass(st_args[i]):
+                    args[i] = JsonParser.class_to_dict(st_args[i])
+                elif JsonParser.inspect.isfunction(st_args[i]):
+                    if st_args[i].__name__ not in JsonParser.func_found:
+                        args[i] = JsonParser.function_to_dict(st_args[i])
                 elif isinstance(st_args[i], staticmethod):
-                    if st_args[i].__func__.__name__ not in JsonSerializer.func_found:
-                        args[i] = JsonSerializer.static_method_to_dict(st_args[i])
+                    if st_args[i].__func__.__name__ not in JsonParser.func_found:
+                        args[i] = JsonParser.static_method_to_dict(st_args[i])
                 elif isinstance(st_args[i], classmethod):
-                    if st_args[i].__func__.__name__ not in JsonSerializer.func_found:
-                        args[i] = JsonSerializer.class_method_to_dict(st_args[i])
-                elif JsonSerializer.inspect.ismodule(st_args[i]):
-                    args[i] = JsonSerializer.module_to_dict(st_args[i])
-                elif JsonSerializer.is_instance(st_args[i]):
-                    args[i] = JsonSerializer.object_to_dict(st_args[i])
+                    if st_args[i].__func__.__name__ not in JsonParser.func_found:
+                        args[i] = JsonParser.class_method_to_dict(st_args[i])
+                elif JsonParser.inspect.ismodule(st_args[i]):
+                    args[i] = JsonParser.module_to_dict(st_args[i])
+                elif JsonParser.is_instance(st_args[i]):
+                    args[i] = JsonParser.object_to_dict(st_args[i])
                 elif isinstance(st_args[i],
                                 (set, dict, list, int, float, type(True), type(False), type(None), tuple)):
                     args[i] = st_args[i]
-        return {"##class_type##": {"name": cls.__name__, "bases": bases, "dict": args}}
+        return {"class_type": {"name": cls.__name__, "bases": bases, "dict": args}}
 
     @staticmethod
     def object_to_dict(obj):
-        return {"##instance_type##": {"class": JsonSerializer.class_to_dict(obj.__class__), "vars": obj.__dict__}}
+        return {"instance_type": {"class": JsonParser.class_to_dict(obj.__class__), "vars": obj.__dict__}}
 
     @staticmethod
     def module_to_dict(obj):
-        return {"##module_type##": obj.__name__}
+        return {"module_type": obj.__name__}
 
     @staticmethod
     def collect_globals(obj, obj_code):
-        JsonSerializer.func_found[obj.__name__] = True
+        JsonParser.func_found[obj.__name__] = True
         gls = {}
         for i in obj_code.co_names:
             try:
-                if JsonSerializer.inspect.isclass(obj.__globals__[i]):
-                    gls[i] = JsonSerializer.class_to_dict(obj.__globals__[i])
-                elif JsonSerializer.inspect.isfunction(obj.__globals__[i]):
-                    if obj.__globals__[i].__name__ not in JsonSerializer.func_found:
-                        gls[i] = JsonSerializer.function_to_dict(obj.__globals__[i])
+                if JsonParser.inspect.isclass(obj.__globals__[i]):
+                    gls[i] = JsonParser.class_to_dict(obj.__globals__[i])
+                elif JsonParser.inspect.isfunction(obj.__globals__[i]):
+                    if obj.__globals__[i].__name__ not in JsonParser.func_found:
+                        gls[i] = JsonParser.function_to_dict(obj.__globals__[i])
                 elif isinstance(obj.__globals__[i], staticmethod):
-                    if obj.__globals__[i].__func__.__name__ not in JsonSerializer.func_found:
-                        gls[i] = JsonSerializer.static_method_to_dict(obj.__globals__[i])
+                    if obj.__globals__[i].__func__.__name__ not in JsonParser.func_found:
+                        gls[i] = JsonParser.static_method_to_dict(obj.__globals__[i])
                 elif isinstance(obj.__globals__[i], classmethod):
-                    if obj.__globals__[i].__func__.__name__ not in JsonSerializer.func_found:
-                        gls[i] = JsonSerializer.class_method_to_dict(obj.__globals__[i])
-                elif JsonSerializer.inspect.ismodule(obj.__globals__[i]):
-                    gls[i] = JsonSerializer.module_to_dict(obj.__globals__[i])
-                elif JsonSerializer.is_instance(obj.__globals__[i]):
-                    gls[i] = JsonSerializer.object_to_dict(obj.__globals__[i])
+                    if obj.__globals__[i].__func__.__name__ not in JsonParser.func_found:
+                        gls[i] = JsonParser.class_method_to_dict(obj.__globals__[i])
+                elif JsonParser.inspect.ismodule(obj.__globals__[i]):
+                    gls[i] = JsonParser.module_to_dict(obj.__globals__[i])
+                elif JsonParser.is_instance(obj.__globals__[i]):
+                    gls[i] = JsonParser.object_to_dict(obj.__globals__[i])
                 elif isinstance(obj.__globals__[i], (set, dict, list, int, float, bool, type(None), tuple, str)):
                     gls[i] = obj.__globals__[i]
             except KeyError:
                 pass
         for i in obj_code.co_consts:
-            if isinstance(i, JsonSerializer.types.CodeType):
-                gls.update(JsonSerializer.collect_globals(obj, i))
+            if isinstance(i, JsonParser.types.CodeType):
+                gls.update(JsonParser.collect_globals(obj, i))
         return gls
 
     @staticmethod
     def static_method_to_dict(obj):
-        return {"##static_method_type##": JsonSerializer.function_to_dict(obj.__func__)}
+        return {"static_method_type": JsonParser.function_to_dict(obj.__func__)}
 
     @staticmethod
     def class_method_to_dict(obj):
-        return {"##class_method_type##": JsonSerializer.function_to_dict(obj.__func__)}
+        return {"class_method_type": JsonParser.function_to_dict(obj.__func__)}
 
     @staticmethod
     def function_to_dict(obj):
-        gls = JsonSerializer.collect_globals(obj, obj.__code__)
+        gls = JsonParser.collect_globals(obj, obj.__code__)
 
-        return {"##function_type##": {"__globals__": gls,
+        return {"function_type": {"__globals__": gls,
                                       "__name__": obj.__name__,
                                       "__code__":
-                                          JsonSerializer.code_to_dict(obj.__code__)
+                                          JsonParser.code_to_dict(obj.__code__)
                                       }}
 
     @staticmethod
@@ -432,31 +432,31 @@ class JsonSerializer:
         elif isinstance(obj, str):
             return "\"" + obj.replace('\\', '\\\\').replace('\"', '\\\"') + "\""
         elif isinstance(obj, (set, tuple)):
-            return JsonSerializer.dumps_list(list(obj), step, new_step)
+            return JsonParser.dumps_list(list(obj), step, new_step)
         elif isinstance(obj, list):
-            return JsonSerializer.dumps_list(obj, step, new_step)
+            return JsonParser.dumps_list(obj, step, new_step)
         elif isinstance(obj, dict):
-            return JsonSerializer.dumps_dict(obj, step, new_step)
-        elif JsonSerializer.inspect.isfunction(obj):
-            res = JsonSerializer.dumps_dict(JsonSerializer.function_to_dict(obj), step, new_step)
-            JsonSerializer.func_found = {}
+            return JsonParser.dumps_dict(obj, step, new_step)
+        elif JsonParser.inspect.isfunction(obj):
+            res = JsonParser.dumps_dict(JsonParser.function_to_dict(obj), step, new_step)
+            JsonParser.func_found = {}
             return res
         elif isinstance(obj, staticmethod):
-            res = JsonSerializer.dumps_dict(JsonSerializer.static_method_to_dict(obj), step, new_step)
-            JsonSerializer.func_found = {}
+            res = JsonParser.dumps_dict(JsonParser.static_method_to_dict(obj), step, new_step)
+            JsonParser.func_found = {}
             return res
         elif isinstance(obj, classmethod):
-            res = JsonSerializer.dumps_dict(JsonSerializer.class_method_to_dict(obj), step, new_step)
-            JsonSerializer.func_found = {}
+            res = JsonParser.dumps_dict(JsonParser.class_method_to_dict(obj), step, new_step)
+            JsonParser.func_found = {}
             return res
-        elif JsonSerializer.inspect.ismodule(obj):
-            return JsonSerializer.dumps_dict(JsonSerializer.module_to_dict(obj), step, new_step)
-        elif JsonSerializer.inspect.isclass(obj):
-            return JsonSerializer.dumps_dict(JsonSerializer.class_to_dict(obj), step, new_step)
-        elif JsonSerializer.is_instance(obj):
-            return JsonSerializer.dumps_dict(JsonSerializer.object_to_dict(obj), step, new_step)
-        elif isinstance(obj, JsonSerializer.types.CodeType):
-            return JsonSerializer.dumps_dict(JsonSerializer.code_to_dict(obj), step, new_step)
+        elif JsonParser.inspect.ismodule(obj):
+            return JsonParser.dumps_dict(JsonParser.module_to_dict(obj), step, new_step)
+        elif JsonParser.inspect.isclass(obj):
+            return JsonParser.dumps_dict(JsonParser.class_to_dict(obj), step, new_step)
+        elif JsonParser.is_instance(obj):
+            return JsonParser.dumps_dict(JsonParser.object_to_dict(obj), step, new_step)
+        elif isinstance(obj, JsonParser.types.CodeType):
+            return JsonParser.dumps_dict(JsonParser.code_to_dict(obj), step, new_step)
         else:
             raise TypeError()
 
@@ -467,45 +467,47 @@ class JsonSerializer:
         new_step = "\n" + new_step
         res = "[" + new_step
         for i in range(len(obj) - 1):
-            res += step + JsonSerializer._dumps(obj[i], step, new_step.replace('\n', '') + step) + "," + new_step
-        res += step + JsonSerializer._dumps(obj[-1], step, new_step.replace('\n', '') + step) + new_step + "]"
+            res += step + JsonParser._dumps(obj[i], step, new_step.replace('\n', '') + step) + "," + new_step
+        res += step + JsonParser._dumps(obj[-1], step, new_step.replace('\n', '') + step) + new_step + "]"
         return res
 
     @staticmethod
     def dumps_dict(obj, step="", new_step=""):
         if not len(obj):
             return "{}"
-        if JsonSerializer.sort:
+        if JsonParser.sort:
             obj = dict(sorted(obj.items()))
         new_step = "\n" + new_step
         res = "{" + new_step
         keys = list(obj)
         for i in keys[:-1]:
-            res += step + '"' + str(i) + '"' + ": " + JsonSerializer._dumps(obj[i], step,
-                                                                    new_step.replace('\n', '') + step) + "," + new_step
-            res += step + '"' + str(keys[-1]) + '"' + ": " + JsonSerializer._dumps(obj[keys[-1]], step,
-                                                                    new_step.replace('\n', '') + step) + new_step + "}"
+            res += step + '"' + str(i) + '"' + ": " + JsonParser._dumps(obj[i], step,
+                                                                            new_step.replace('\n',
+                                                                                             '') + step) + "," + new_step
+        res += step + '"' + str(keys[-1]) + '"' + ": " + JsonParser._dumps(obj[keys[-1]], step,
+                                                                               new_step.replace('\n',
+                                                                                                '') + step) + new_step + "}"
         return res
 
     @staticmethod
     def dump(obj, fp, sort_keys=False, indent=None):
         try:
             with open(fp, 'w') as file:
-                file.write(JsonSerializer.dumps(obj, sort_keys, indent))
+                file.write(JsonParser.dumps(obj, sort_keys, indent))
         except FileNotFoundError:
             raise FileNotFoundError("file doesn't exist")
 
     @staticmethod
     def dumps(obj, sort_keys=False, indent=None):
-        JsonSerializer.func_found = {}
-        JsonSerializer.sort = sort_keys
+        JsonParser.func_found = {}
+        JsonParser.sort = sort_keys
         if isinstance(indent, int) and indent > 0:
             step = " " * indent
-            res = JsonSerializer._dumps(obj, step)
+            res = JsonParser._dumps(obj, step)
             if indent < 1:
                 res = res.replace("\n", "")
         else:
-            res = JsonSerializer._dumps(obj).replace("\n", "")
+            res = JsonParser._dumps(obj).replace("\n", "")
         return res
 
     @staticmethod
@@ -515,7 +517,7 @@ class JsonSerializer:
                 data = file.read()
         except FileNotFoundError:
             raise FileNotFoundError("file doesn't exist")
-        return JsonSerializer.loads(data)
+        return JsonParser.loads(data)
 
     @staticmethod
     def loads(string):
@@ -527,13 +529,13 @@ class JsonSerializer:
             pass
 
         if string[index] == '"':
-            obj, index = JsonSerializer.parse_string(string, index + 1)
+            obj, index = JsonParser.parse_string(string, index + 1)
         elif string[index].isdigit() or (string[index] == '-' and string[index + 1].isdigit()):
-            obj, index = JsonSerializer.parse_digit(string, index)
+            obj, index = JsonParser.parse_digit(string, index)
         elif string[index] == '{':
-            obj, index = JsonSerializer.parse_dict(string, index + 1)
+            obj, index = JsonParser.parse_dict(string, index + 1)
         elif string[index] == '[':
-            obj, index = JsonSerializer.parse_array(string, index + 1)
+            obj, index = JsonParser.parse_array(string, index + 1)
         elif string[index] == 'n' and string[index:index + 4] == 'null':
             obj = None
             index += 4
@@ -564,3 +566,5 @@ class JsonSerializer:
             pass
 
         return obj
+
+

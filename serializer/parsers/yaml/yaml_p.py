@@ -1,15 +1,14 @@
-from serializers.parser_sk import Parser
 from yaml import dump as dumps, full_load as loads
 
 
-class YamlSerializer(Parser):
+class YamlParser:
     @staticmethod
     def dumps(obj) -> str:
         return dumps(obj)
 
     @staticmethod
-    def dump(obj, file="testyaml.yaml"):
-        with open(file, 'w+') as fw:
+    def dump(obj, file="parsed_file/parsed.yaml"):
+        with open(file, 'w') as fw:
             dumps(obj, fw)
 
     @staticmethod
@@ -17,6 +16,7 @@ class YamlSerializer(Parser):
         return loads(obj)
 
     @staticmethod
-    def load(file="testyaml.yaml"):
-        with open(file, 'r+'):
-            return loads(file)
+    def load(file="parsed_file/parsed.yaml"):
+        with open(file, 'r') as fp:
+            return loads(fp)
+

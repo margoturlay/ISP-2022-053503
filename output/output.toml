@@ -1,0 +1,24 @@
+__type__ = "function"
+__name__ = "test_mul"
+
+[__globals__]
+
+[__args__]
+co_argcount = 1
+co_cellvars = []
+co_code = [ 124, 0, 100, 1, 20, 0, 83, 0,]
+co_consts = [ "!None", 2,]
+co_filename = "C:\\Users\\ASUS\\PycharmProjects\\margo\\tests\\tests.py"
+co_firstlineno = 14
+co_flags = 67
+co_freevars = []
+co_kwonlyargcount = 0
+co_lines = "<built-in method co_lines of code object at 0x0000025CF2637E10>"
+co_linetable = [ 8, 1,]
+co_lnotab = [ 0, 1,]
+co_name = "test_mul"
+co_names = []
+co_nlocals = 1
+co_posonlyargcount = 0
+co_stacksize = 2
+co_varnames = [ "n",]

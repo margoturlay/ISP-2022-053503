@@ -1,6 +1,7 @@
-import builtins
+from types import FunctionType, CodeType, LambdaType
 import inspect
-from types import CodeType, FunctionType, LambdaType
+import builtins
+
 
 primitives = (int, str, bool, float)
 FUNCTION_ATTRIBUTES = [
