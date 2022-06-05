@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block maincontent %}
+
+    <div>
+        <h1>{{post.title}}</h1>
+        <h3>{{post.subtitle}}</h3>
+        <img width="30%" src="{{ post.image.url }}" >
+        <p>{{post.content}}</p>
+        <p>{{post.issued}}</p>
+        <p>by {{post.author.name}}</p>
+        
+    </div>
+
+{% endblock maincontent %}

@@ -1,0 +1,39 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Blogs !!!</title>
+        <link rel="stylesheet" href="{% static 'testApp/css/style.css' %}">
+        <script src="{% static 'testApp/js/script.js' %}" ></script>
+    </head>
+    <body>
+        <div id="header" style="display:flex">
+            <a href="{% url 'posts' %}"><h1 id="logo">Blogs !!!</h1></a>
+            <div style="padding-left:80%">
+                {% if user.is_authenticated %}
+                    <p>{{ user.get_username }}
+                        {% if perms.testApp.add_post %}
+                            |Add post|
+                        {% endif %}
+                        <a href="{% url 'logout' %}?next={{ request.path }}">Logout</a>
+                    </p>
+                {% else %}
+                    <a href="{% url 'login' %}?next={{ request.path }}">Login</a>
+                {% endif %}
+                
+            </div>
+        </div>
+        <div id="content">
+
+            {% block maincontent %}
+            {% endblock maincontent %}
+
+        </div>
+        <div id="footer">
+            <p>powered by Django</p>
+        </div>
+    </body>
+</html>

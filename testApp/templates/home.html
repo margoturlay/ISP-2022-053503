@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block maincontent %}
+            
+    {% for post in posts %}
+        <div>
+            <a href="{% url 'post' post.id %}">
+                <h2>{{ post.title|capfirst }}</h2>
+                {% if post.id in viewed_posts.values %}
+                    <p>|viewed|</p>
+                {% endif %}
+                <h3>{{ post.subtitle|capfirst }}</h3>
+                <img width="15%" src="{{ post.image.url }}">
+            </a>
+        </div>
+    {% endfor %}
+
+{% endblock maincontent %}
