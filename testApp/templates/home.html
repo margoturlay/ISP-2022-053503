@@ -3,16 +3,66 @@
 {% block maincontent %}
             
     {% for post in posts %}
-        <div>
-            <a href="{% url 'post' post.id %}">
-                <h2>{{ post.title|capfirst }}</h2>
-                {% if post.id in viewed_posts.values %}
-                    <p>|viewed|</p>
-                {% endif %}
-                <h3>{{ post.subtitle|capfirst }}</h3>
-                <img width="15%" src="{{ post.image.url }}">
-            </a>
+        <div id="content">
+            <div id="content_block">
+                <table>
+                    <tr id="tr_block">
+                        <tr>
+                            <td>
+                                <a href="{% url 'post' post.id %}">
+                                    <h2>{{ post.title|capfirst }}</h2>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label style="font-size: large;">{{ post.subtitle|capfirst }}</label>
+                            </td>
+
+                        </tr>
+                        <tr>
+                            <td>
+                                {% if post.id in viewed_posts.values %}
+                                    <label style="color: darkred;">|viewed|</label>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </tr>
+                    <tr>
+                        <img width="35%" style="float: left" id="content_block" src="{{ post.image.url }}">
+                    </tr>
+                </table>
+            </div>
         </div>
     {% endfor %}
+
+    <style>
+    #content{
+        width: 50vw;
+        overflow-y: auto;
+        display: block;
+        margin: auto;
+    }
+    #content_block{
+        border: 2px solid #0f0f0f;
+        border-radius: 10px;
+        margin-bottom: 2vh;
+        text-align: center;
+        height: auto;
+        height: 30vh;
+        background-color: #f2f2f2;
+    }
+    a{
+        text-decoration: none;
+    }
+    #content_block img{
+        border: 0px;
+        border-radius: 10px;
+
+    }
+    #tr_block{
+        margin-left:2vw;
+    }
+    </style>
 
 {% endblock maincontent %}

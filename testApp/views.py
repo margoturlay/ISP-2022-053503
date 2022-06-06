@@ -1,8 +1,11 @@
+import logging
 from django.http.response import HttpResponse
 from django.shortcuts import redirect, render
 from .models import Post, Author
 from .forms import AddPost
 import datetime
+
+logger = logging.getLogger('django')
 
 def home(request):
 
@@ -29,6 +32,7 @@ def add_post(request):
         form = AddPost(request.POST, request.FILES)
 
         if form.is_valid():
+            logger.info("Post was created")
             post_entity = Post()
             post_entity.title = form.cleaned_data['title']
             post_entity.subtitle = form.cleaned_data['subtitle']

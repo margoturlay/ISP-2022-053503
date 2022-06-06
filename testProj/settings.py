@@ -12,21 +12,24 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 from pathlib import Path
 import os
+# from dotenv import load_dotenv
+# load_dotenv()
+# SECRET_KEY = str(os.getenv('SECRET_KEY'))
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+SECRET_KEY = 'django-insecure-ukku%)(ef6$rg=2=muo=w5nemi^@+2+6+e)e#(5=1ko0bm0@yk'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-ukku%)(ef6$rg=2=muo=w5nemi^@+2+6+e)e#(5=1ko0bm0@yk'
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*', 'ultra-social-blog.herokuapp.com']
 
 
 # Application definition
@@ -77,8 +80,15 @@ WSGI_APPLICATION = 'testProj.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        # 'ENGINE': 'django.db.backends.sqlite3',
+        # 'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'socialDB',
+        'USER': 'margo',
+        'PASSWORD': 'password',
+        'HOST': 'db',
+        # 'HOST': '127.0.0.1',
+        'PORT': '3306',
     }
 }
 
@@ -107,7 +117,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Moscow'
 
 USE_I18N = True
 
